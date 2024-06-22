@@ -1,10 +1,28 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 
 const useFetch = (url) => {
-  // Task 1: complete this custom hook
-  // step1: create 3 states: data, isLoading, error
-  // step2: fetch data & handle error
-  // step3: return 3 states
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async (url) => {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setData(data);
+      setIsLoading(false);
+      setError(null);
+    } catch (error) {
+      setIsLoading(false);
+      setError(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(url);
+  }, [url]);
+
+  return { data, isLoading, error };
 };
 
 export default useFetch;

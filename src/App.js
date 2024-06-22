@@ -1,30 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Search from './components/Search';
 import Users from './components/Users';
+import useFetch from './hook/useFetch';
 
 const App = () => {
-  // Task 2: use custom hook
-  // get data, error, isLoading states from custom hook here
-  // use url: 'https://jsonplaceholder.typicode.com/users'
+  const { data, isLoading, error } = useFetch('https://jsonplaceholder.typicode.com/users');
+  const [users, setUsers] = useState([]);
+  //Initial State of users: The initial state of users is set to data, which might be undefined at the start. This could lead to issues. It's better to initialize it as an empty array.
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
-  // Task 3: delete user
-  // get the id from User.js
-  const handleDeleteUser = (id) => {};
+  //The useEffect hook listens for changes in data. Once data is fetched, useEffect sets the users.
+  useEffect(() => {
+    setUsers(data);
+    setFilteredUsers(data);
+  }, [data]);
 
-  // Task 4: search user
-  // get the text from Search.js
-  const handleSearch = (searchText) => {};
+  const handleDeleteUser = (id) => {
+    //Uses filteredUsers.filter() because the deletion should affect only the currently displayed list of users.
+    const filter = filteredUsers.filter((user) => user.id !== id);
+    setFilteredUsers(filter);
+  };
+
+  const handleSearch = (searchText) => {
+    const value = searchText.toLowerCase();
+    //Uses users.filter() because the search should consider all available users.
+    const newUsers = users.filter((user) => {
+      const userName = user.name.toLowerCase();
+      return userName.startsWith(value);
+    });
+    setFilteredUsers(newUsers);
+  };
 
   return (
     <div className="container">
       <h1 className="title">Users Management App</h1>
       {isLoading && <p>Loading users...</p>}
       {error && <p>{error}</p>}
-
-      {/* Needs to pass functions from here for state lifting  */}
-      <Search onHandleSearch={} />
-      {users.length > 1 && <Users users={usersCopy} onHandleDeleteUser={} />}
+      <Search onHandleSearch={handleSearch} />
+      {filteredUsers && <Users users={filteredUsers} onHandleDeleteUser={handleDeleteUser} />}
     </div>
   );
 };
